@@ -7,12 +7,13 @@ import './App.css';
 
 const App = () => {
   const [selectedArtwork, setSelectedArtwork] = useState(null);
+  const [filteredArtworks, setFilteredArtworks] = useState([]);
 
   const handleSearch = (searchTerm) => {
-    // Implémentez votre logique de recherche ici
-    // Par exemple, filtrez les œuvres d'art en fonction du terme de recherche
-    // et mettez à jour l'état des œuvres d'art affichées
-    console.log(`Recherche : ${searchTerm}`);
+    const filtered = artworks.filter(artwork =>
+      artwork.title.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    setFilteredArtworks(filtered);
   };
 
   const handleArtworkSelect = (artwork) => {
@@ -25,7 +26,7 @@ const App = () => {
       <SearchBar onSearch={handleSearch} />
       <div className="content">
         <ArtworkList
-          artworks={artworks}
+          artworks={filteredArtworks.length > 0 ? filteredArtworks : artworks}
           onArtworkSelect={handleArtworkSelect}
         />
         {selectedArtwork && <ArtworkDetail artwork={selectedArtwork} />}
