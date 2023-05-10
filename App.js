@@ -1,37 +1,37 @@
-import React, { useState } from 'react';
-import ArtworkList from './components/ArtworkList';
-import ArtworkDetail from './components/ArtworkDetail';
-import SearchBar from './components/SearchBar';
-import artworks from './data/artworks';
-import './App.css';
+import { StatusBar } from 'expo-status-bar';
+import React from 'react';
+import { StyleSheet, Text, View } from 'react-native';
+import AddButton from './Components/AddButton';
+
+
 
 const App = () => {
-  const [selectedArtwork, setSelectedArtwork] = useState(null);
-
-  const handleSearch = (searchTerm) => {
-    // Implémentez votre logique de recherche ici
-    // Par exemple, filtrez les œuvres d'art en fonction du terme de recherche
-    // et mettez à jour l'état des œuvres d'art affichées
-    console.log(`Recherche : ${searchTerm}`);
-  };
-
-  const handleArtworkSelect = (artwork) => {
-    setSelectedArtwork(artwork);
+  const handlePress = () => {
+    console.log('Le bouton Ajouter une œuvre a été pressé.');
   };
 
   return (
-    <div className="app">
-      <h1>Œuvres d'Art</h1>
-      <SearchBar onSearch={handleSearch} />
-      <div className="content">
-        <ArtworkList
-          artworks={artworks}
-          onArtworkSelect={handleArtworkSelect}
-        />
-        {selectedArtwork && <ArtworkDetail artwork={selectedArtwork} />}
-      </div>
-    </div>
+    <View style={styles.container}>
+      <Text style={styles.welcome}>Bienvenue sur Art Hunter !</Text>
+      <AddButton content="Ajouter une œuvre" onPress={handlePress} />
+    </View>
   );
 };
 
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  welcome: {
+    fontSize: 20,
+    textAlign: 'center',
+    margin: 10,
+  },
+});
+
 export default App;
+
+
+
