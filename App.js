@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
+import { View, Text, StyleSheet } from 'react-native';
 import ArtworkList from './components/ArtworkList';
 import ArtworkDetail from './components/ArtworkDetail';
 import SearchBar from './components/SearchBar';
 import artworks from './data/artworks';
-import './App.css';
 
 const App = () => {
   const [selectedArtwork, setSelectedArtwork] = useState(null);
@@ -21,18 +21,34 @@ const App = () => {
   };
 
   return (
-    <div className="app">
-      <h1>Œuvres d'Art</h1>
+    <View style={styles.app}>
+      <Text style={styles.heading}>Œuvres d'Art</Text>
       <SearchBar onSearch={handleSearch} />
-      <div className="content">
+      <View style={styles.content}>
         <ArtworkList
           artworks={filteredArtworks.length > 0 ? filteredArtworks : artworks}
           onArtworkSelect={handleArtworkSelect}
         />
         {selectedArtwork && <ArtworkDetail artwork={selectedArtwork} />}
-      </div>
-    </div>
+      </View>
+    </View>
   );
 };
+
+const styles = StyleSheet.create({
+  app: {
+    flex: 1,
+    padding: 20,
+    backgroundColor: '#fff',
+  },
+  heading: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 20,
+  },
+  content: {
+    flex: 1,
+  },
+});
 
 export default App;
