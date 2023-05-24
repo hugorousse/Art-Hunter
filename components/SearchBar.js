@@ -1,28 +1,46 @@
 import React, { useState } from 'react';
+import { View, TextInput, Button, StyleSheet } from 'react-native';
 
 const SearchBar = ({ onSearch }) => {
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchValue, setSearchValue] = useState('');
 
-  const handleChange = (event) => {
-    setSearchTerm(event.target.value);
+  const handleInputChange = (text) => {
+    setSearchValue(text);
   };
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    onSearch(searchTerm);
+  const handleSearchClick = () => {
+    onSearch(searchValue);
   };
 
   return (
-    <form onSubmit={handleSubmit} className="search-bar">
-      <input
-        type="text"
-        placeholder="Rechercher..."
-        value={searchTerm}
-        onChange={handleChange}
+    <View style={styles.searchBar}>
+      <TextInput
+        style={styles.input}
+        value={searchValue}
+        onChangeText={handleInputChange}
       />
-      <button type="submit">Rechercher</button>
-    </form>
+      <Button
+        title="Rechercher"
+        onPress={handleSearchClick}
+      />
+    </View>
   );
 };
+
+const styles = StyleSheet.create({
+  searchBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  input: {
+    flex: 1,
+    height: 40,
+    borderWidth: 1,
+    borderColor: 'gray',
+    marginRight: 10,
+    paddingHorizontal: 10,
+  },
+});
 
 export default SearchBar;

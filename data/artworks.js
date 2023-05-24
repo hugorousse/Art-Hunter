@@ -3,7 +3,7 @@ const artworks = [
       id: 1,
       title: "La Joconde",
       artist: "Leonardo da Vinci",
-      image: "https://example.com/mona-lisa.jpg",
+      image: "https://upload.wikimedia.org/wikipedia/commons/6/6a/Mona_Lisa.jpg",
       description: "La Joconde est une célèbre peinture de Leonardo da Vinci...",
       dimensions: "77 cm × 53 cm",
     },
