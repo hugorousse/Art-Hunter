@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
-import { signInWithEmailAndPassword } from 'firebase/auth'; // Importez la fonction d'authentification de Firebase
+import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
 import { getArtworks } from '../Fire'; // Importez la fonction de récupération des œuvres d'art depuis Firebase
 
 const Authentification = ({ onClose }) => {
@@ -10,10 +10,10 @@ const Authentification = ({ onClose }) => {
 
   const handleLogin = () => {
     setError(null);
-
-    // Utilisez la fonction d'authentification de Firebase pour vous connecter
-    signInWithEmailAndPassword(app.auth(), username, password)
-      .then(() => {
+  
+    const auth = getAuth();
+    signInWithEmailAndPassword(auth, username, password)
+      .then((userCredential) => {
         // Connexion réussie, récupérez les œuvres d'art depuis Firebase
         getArtworks((artworks) => {
           // Fournissez les œuvres d'art à l'application principale via la fonction de fermeture

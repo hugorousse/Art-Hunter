@@ -1,13 +1,15 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React, { useState , useEffect} from 'react';
+import { View, Text, StyleSheet, Modal } from 'react-native';
 import ArtworkList from './components/ArtworkList';
 import ArtworkDetail from './components/ArtworkDetail';
 import SearchBar from './components/SearchBar';
-import artworks from './data/artworks';
+import Authentification from './components/Authentification';
+import { getArtworks } from './Fire'; // Importez les fonctions de Firebase
 
 const App = () => {
   const [selectedArtwork, setSelectedArtwork] = useState(null);
   const [filteredArtworks, setFilteredArtworks] = useState([]);
+  const [isAuthModalVisible, setIsAuthModalVisible] = useState(true);
 
   const handleSearch = (searchTerm) => {
     const filtered = artworks.filter(artwork =>
@@ -20,16 +22,35 @@ const App = () => {
     setSelectedArtwork(artwork);
   };
 
+  const handleAuthModalClose = () => {
+    setIsAuthModalVisible(false);
+  };
+
+  // Utilisez useEffect pour récupérer les œuvres d'art à partir de Firebase
+  useEffect(() => {
+    getArtworks((artworks) => {
+      setFilteredArtworks(artworks);
+    });
+  }, []);
+
   return (
     <View style={styles.app}>
       <Text style={styles.heading}>Œuvres d'Art</Text>
       <SearchBar onSearch={handleSearch} />
       <View style={styles.content}>
+        <Modal visible={isAuthModalVisible} onRequestClose={handleAuthModalClose}>
+          <Authentification onClose={handleAuthModalClose} />
+        </Modal>
         <ArtworkList
-          artworks={filteredArtworks.length > 0 ? filteredArtworks : artworks}
+          artworks={filteredArtworks}
           onArtworkSelect={handleArtworkSelect}
         />
-        {selectedArtwork && <ArtworkDetail artwork={selectedArtwork} />}
+        {selectedArtwork && (
+          <Modal visible={true} onRequestClose={() => setSelectedArtwork(null)}>
+            <ArtworkDetail artwork={selectedArtwork} />
+            <Button title="Fermer" onPress={() => setSelectedArtwork(null)} />
+          </Modal>
+        )}
       </View>
     </View>
   );
