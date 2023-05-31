@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Modal, Button, TextInput } from 'react-native';
+import { View, Text, StyleSheet, Modal, Button, TextInput, Image  } from 'react-native';
 import ArtworkList from './components/ArtworkList';
 import ArtworkDetail from './components/ArtworkDetail';
 import Authentification from './components/Authentification';
 import InscriptionModal from './components/InscriptionModal';
 import { getArtworks, db } from './Fire';
 import { query, onSnapshot, collection, where } from 'firebase/firestore'; // Importez ces modules depuis 'firebase/firestore'
+//import SplashScreen from 'react-native-splash-screen';
+//import SplashScreen from './components/SplashScreen';
 
 const App = () => {
   const [selectedArtwork, setSelectedArtwork] = useState(null);
@@ -16,6 +18,7 @@ const App = () => {
   const [isInscriptionModal, setIsInscriptionModalVisible] = useState(false);
   const [screenStack, setScreenStack] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
 
   const handleSearch = () => {
     const q = query(
@@ -66,8 +69,17 @@ const App = () => {
   useEffect(() => {
     getArtworks((artworks) => {
       setFilteredArtworks(artworks);
+      setIsLoading(false);
     });
   }, []);
+
+  if (isLoading) {
+    return (
+      <View style={{flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: 'white'}}>
+        <Image source={require('./assets/bow.png')} style={{ width: '100%', height: '80%', resizeMode: 'contain' }} />
+      </View>
+    );
+  }
 
   const renderScreen = () => {
     if (isAuthModalVisible) {
