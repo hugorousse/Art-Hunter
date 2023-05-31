@@ -1,40 +1,63 @@
-import React from 'react';
-import { View, Image, Text, TouchableOpacity } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
 
-const Artwork = ({ artwork, onArtworkSelect }) => {
-  const handleArtworkClick = () => {
-    onArtworkSelect(artwork);
+const Artwork = ({ artwork, onClick }) => {
+  const [showDescription, setShowDescription] = useState(false);
+
+  const toggleDescription = () => {
+    setShowDescription(!showDescription);
   };
 
   return (
-    <TouchableOpacity style={styles.artworkContainer} onPress={handleArtworkClick}>
-      <Image source={{ uri: artwork.image }} style={styles.artworkImage} />
-      <Text style={styles.artworkTitle}>{artwork.title}</Text>
-      <Text style={styles.artworkArtist}>Par {artwork.artist}</Text>
+    <TouchableOpacity onPress={() => onClick(artwork)}>
+      <View style={styles.container}>
+        <Image source={{ uri: artwork.image }} style={styles.image} />
+        <Text style={styles.title}>{artwork.title}</Text>
+        {showDescription && (
+          <View>
+            <Text style={styles.text}>Artist: {artwork.artist}</Text>
+            <Text style={styles.text}>Date: {artwork.date}</Text>
+            <Text style={styles.text}>Description: {artwork.description}</Text>
+          </View>
+        )}
+        <TouchableOpacity onPress={toggleDescription} style={styles.button}>
+          <Text style={styles.buttonText}>{showDescription ? 'Cacher la Description' : 'Description'}</Text>
+        </TouchableOpacity>
+      </View>
     </TouchableOpacity>
   );
 };
 
-const styles = {
-  artworkContainer: {
-    marginBottom: 20,
+const styles = StyleSheet.create({
+  container: {
+    margin: 10,
+    padding: 10,
+    backgroundColor: '#f2f2f2',
+    borderRadius: 5,
     alignItems: 'center',
   },
-  artworkImage: {
+  image: {
     width: 200,
     height: 200,
-    resizeMode: 'cover',
-    borderRadius: 10,
+    marginBottom: 10,
   },
-  artworkTitle: {
-    marginTop: 10,
-    fontSize: 18,
+  title: {
+    fontSize: 20,
     fontWeight: 'bold',
+    marginBottom: 5,
   },
-  artworkArtist: {
-    marginTop: 5,
+  text: {
     fontSize: 16,
+    marginBottom: 5,
   },
-};
+  button: {
+    backgroundColor: '#e6e6e6',
+    padding: 5,
+    borderRadius: 3,
+  },
+  buttonText: {
+    fontSize: 14,
+  },
+});
 
 export default Artwork;

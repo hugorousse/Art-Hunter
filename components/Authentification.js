@@ -1,28 +1,39 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
-import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
-import { getArtworks } from '../Fire'; // Importez la fonction de récupération des œuvres d'art depuis Firebase
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
+import { app } from '../Fire';
 
-const Authentification = ({ onClose }) => {
-  const [username, setUsername] = useState('');
+const Authentification = ({ onClose, onLoginSuccess }) => {
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
+  const auth = getAuth(app);
 
-  const handleLogin = () => {
+  const handleRegister = () => {
     setError(null);
-  
-    const auth = getAuth();
-    signInWithEmailAndPassword(auth, username, password)
+
+    createUserWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
-        // Connexion réussie, récupérez les œuvres d'art depuis Firebase
-        getArtworks((artworks) => {
-          // Fournissez les œuvres d'art à l'application principale via la fonction de fermeture
-          onClose(artworks);
-        });
+        const user = userCredential.user;
+        // ...
       })
       .catch((error) => {
-        // Erreur lors de la connexion, affichez l'erreur à l'utilisateur
-        setError(error.message);
+        const errorCode = error.code;
+        const errorMessage = error.message;
+      });
+  };
+
+  const handleLogin = async () => {
+    setError(null);
+    await signInWithEmailAndPassword(auth, email, password)
+      .then((userCredential) => {
+        const user = userCredential.user;
+        console.log(user);
+        onLoginSuccess();
+      })
+      .catch((error) => {
+        const errorCode = error.code;
+        const errorMessage = error.message;
       });
   };
 
@@ -31,9 +42,9 @@ const Authentification = ({ onClose }) => {
       <Text style={styles.title}>Authentification</Text>
       <TextInput
         style={styles.input}
-        placeholder="Nom d'utilisateur"
-        value={username}
-        onChangeText={setUsername}
+        placeholder="Adresse email"
+        value={email}
+        onChangeText={setEmail}
       />
       <TextInput
         style={styles.input}
@@ -43,6 +54,7 @@ const Authentification = ({ onClose }) => {
         onChangeText={setPassword}
       />
       {error && <Text style={styles.error}>{error}</Text>}
+      <Button title="S'inscrire" onPress={handleRegister} />
       <Button title="Se connecter" onPress={handleLogin} />
     </View>
   );
