@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { View, TextInput, Button, StyleSheet } from 'react-native';
 
 const SearchBar = ({ onSearch }) => {
@@ -9,8 +9,11 @@ const SearchBar = ({ onSearch }) => {
   };
 
   const handleSearchClick = () => {
-    onSearch(searchValue);
+    const searchTerm = inputRef.current.value;
+    onSearch(searchTerm); // Utilisez directement la variable onSearch, pas props.onSearch
   };
+
+  const inputRef = useRef(null);
 
   return (
     <View style={styles.searchBar}>
@@ -18,6 +21,7 @@ const SearchBar = ({ onSearch }) => {
         style={styles.input}
         value={searchValue}
         onChangeText={handleInputChange}
+        ref={inputRef} // Assurez-vous d'ajouter cette ligne pour assigner la référence
       />
       <Button
         title="Rechercher"

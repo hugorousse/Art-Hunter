@@ -1,57 +1,124 @@
-import React, { useState , useEffect} from 'react';
-import { View, Text, StyleSheet, Modal } from 'react-native';
+import { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, Modal, Button, TextInput } from 'react-native';
 import ArtworkList from './components/ArtworkList';
 import ArtworkDetail from './components/ArtworkDetail';
-import SearchBar from './components/SearchBar';
 import Authentification from './components/Authentification';
-import { getArtworks } from './Fire'; // Importez les fonctions de Firebase
+import InscriptionModal from './components/InscriptionModal';
+import { getArtworks, db } from './Fire';
+import { query, onSnapshot, collection, where } from 'firebase/firestore'; // Importez ces modules depuis 'firebase/firestore'
 
 const App = () => {
   const [selectedArtwork, setSelectedArtwork] = useState(null);
   const [filteredArtworks, setFilteredArtworks] = useState([]);
   const [isAuthModalVisible, setIsAuthModalVisible] = useState(true);
+  const [isArtworkModalVisible, setIsArtworkModalVisible] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isInscriptionModal, setIsInscriptionModalVisible] = useState(false);
+  const [screenStack, setScreenStack] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
 
-  const handleSearch = (searchTerm) => {
-    const filtered = artworks.filter(artwork =>
-      artwork.title.toLowerCase().includes(searchTerm.toLowerCase())
+  const handleSearch = () => {
+    const q = query(
+      collection(db, 'artworks'),
+      where('title', '==', searchTerm)
     );
-    setFilteredArtworks(filtered);
+
+    onSnapshot(q, (snapshot) => {
+      const artworks = [];
+      snapshot.forEach((doc) => {
+        artworks.push({ id: doc.id, ...doc.data() });
+      });
+
+      setFilteredArtworks(artworks);
+    });
+  };
+
+  const handleInscriptionModal = () => {
+    setIsModalVisible(false);
+    setIsInscriptionModalVisible(true);
+  };
+
+  const handleRedirect = () => {
+    setIsModalVisible(true);
+    setIsInscriptionModalVisible(false);
   };
 
   const handleArtworkSelect = (artwork) => {
     setSelectedArtwork(artwork);
+    setScreenStack((prevStack) => [...prevStack, 'ArtworkDetail']);
   };
 
   const handleAuthModalClose = () => {
     setIsAuthModalVisible(false);
   };
 
-  // Utilisez useEffect pour récupérer les œuvres d'art à partir de Firebase
+  const handleArtworkModalClose = () => {
+    setSelectedArtwork(null);
+    setScreenStack((prevStack) => prevStack.slice(0, prevStack.length - 1));
+  };
+
+  const handleLoginSuccess = () => {
+    setIsAuthenticated(true);
+    setIsAuthModalVisible(false);
+    setScreenStack(['ArtworkList']);
+  };
+
   useEffect(() => {
     getArtworks((artworks) => {
       setFilteredArtworks(artworks);
     });
   }, []);
 
+  const renderScreen = () => {
+    if (isAuthModalVisible) {
+      return (
+        <Modal visible={isAuthModalVisible} onRequestClose={handleAuthModalClose}>
+          <Authentification onLoginSuccess={handleLoginSuccess} />
+        </Modal>
+      );
+    } else if (isArtworkModalVisible) {
+      return (
+        <Modal visible={isArtworkModalVisible} onRequestClose={handleArtworkModalClose}>
+          {selectedArtwork && (
+            <View>
+              <ArtworkDetail artwork={selectedArtwork} />
+              <Button title="Fermer" onPress={handleArtworkModalClose} />
+            </View>
+          )}
+        </Modal>
+      );
+    } else {
+      if (screenStack.length > 0) {
+        const currentScreen = screenStack[screenStack.length - 1];
+        switch (currentScreen) {
+          case 'ArtworkList':
+            return (
+              <>
+                <ArtworkList
+                  artworks={filteredArtworks}
+                  onArtworkSelect={handleArtworkSelect}
+                />
+              </>
+            );
+          case 'ArtworkDetail':
+            return (
+              <ArtworkDetail
+                artwork={selectedArtwork}
+                onClose={handleArtworkModalClose}
+              />
+            );
+          default:
+            return null;
+        }
+      }
+    }
+  };
+  
+
   return (
     <View style={styles.app}>
       <Text style={styles.heading}>Œuvres d'Art</Text>
-      <SearchBar onSearch={handleSearch} />
-      <View style={styles.content}>
-        <Modal visible={isAuthModalVisible} onRequestClose={handleAuthModalClose}>
-          <Authentification onClose={handleAuthModalClose} />
-        </Modal>
-        <ArtworkList
-          artworks={filteredArtworks}
-          onArtworkSelect={handleArtworkSelect}
-        />
-        {selectedArtwork && (
-          <Modal visible={true} onRequestClose={() => setSelectedArtwork(null)}>
-            <ArtworkDetail artwork={selectedArtwork} />
-            <Button title="Fermer" onPress={() => setSelectedArtwork(null)} />
-          </Modal>
-        )}
-      </View>
+      <View style={styles.content}>{renderScreen()}</View>
     </View>
   );
 };
@@ -69,6 +136,19 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
+  },
+  searchBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  input: {
+    flex: 1,
+    height: 40,
+    borderWidth: 1,
+    borderColor: 'gray',
+    marginRight: 10,
+    paddingHorizontal: 10,
   },
 });
 

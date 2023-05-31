@@ -1,46 +1,68 @@
 import React, { useState, useEffect } from 'react';
-import { View, Button } from 'react-native';
+import { View, Button, Picker, TextInput } from 'react-native';
 import Artwork from '../components/Artwork';
-import { database } from '../firebaseConfig';
-import { getArtworks, addArtwork } from '../Fire';
+import { getArtworks, addArtwork, deleteArtwork } from '../Fire';
 
 const ArtworkList = () => {
   const [artworks, setArtworks] = useState([]);
+  const [selectedArtwork, setSelectedArtwork] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const createArtwork = () => {
-    const artworkData = {
-      id: "ur5ONg87G0uD8HbVvAKw",
-      title: "La Joconde",
-      artist: "Leonardo da Vinci",
-      date: "1503",
-      description: "Un portrait célèbre peint par Leonardo da Vinci",
-      image: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f9/Mona_Lisa%2C_by_Leonardo_da_Vinci%2C_from_C2RMF_natural_color.jpg/1200px-Mona_Lisa%2C_by_Leonardo_da_Vinci%2C_from_C2RMF_natural_color.jpg",
-    };
-    
-    addArtwork(artworkData)
+    if (selectedArtwork) {
+      addArtwork(selectedArtwork);
+    }
+  };
 
-    /* const artworksRef = database.ref('artworks');
-    artworksRef.push(artworkData)
-      .then(() => {
-        console.log("Données ajoutées avec succès !");
-      })
-      .catch(error => {
-        console.error("Erreur lors de l'ajout des données :", error);
-      }); */
+  const removeArtwork = () => {
+    if (selectedArtwork) {
+      deleteArtwork(selectedArtwork);
+      setSelectedArtwork(null);
+    }
+  };
+
+  const showArtworkDescription = (artwork) => {
+    console.log(artwork.description);
+  };
+
+  const showArtworkDate = (artwork) => {
+    console.log(artwork.date);
   };
 
   useEffect(() => {
     getArtworks(artworks => {
-      setArtworks(artworks)
-    })
+      setArtworks(artworks);
+    });
   }, []);
+
+  const filteredArtworks = artworks.filter(artwork => {
+    return artwork.title.toLowerCase().includes(searchQuery.toLowerCase());
+  });
 
   return (
     <View>
-      {artworks.map(artwork => (
-        <Artwork key={artwork.id} artwork={artwork} />
+      <TextInput
+        placeholder="Rechercher une œuvre d'art"
+        value={searchQuery}
+        onChangeText={text => setSearchQuery(text)}
+      />
+      {filteredArtworks.map(artwork => (
+        <Artwork key={artwork.id} artwork={artwork} onClick={showArtworkDescription} onClick={showArtworkDate} />
       ))}
+      <Picker
+        selectedValue={selectedArtwork ? selectedArtwork.id : null}
+        onValueChange={(itemValue) => {
+          const selected = artworks.find(artwork => artwork.id === itemValue);
+          setSelectedArtwork(selected);
+        }}
+      >
+        <Picker.Item label="Sélectionnez une œuvre" value={null} />
+        {filteredArtworks.map(artwork => (
+          <Picker.Item key={artwork.id} label={artwork.title} value={artwork.id} />
+        ))}
+      </Picker>
       <Button title="Ajouter une œuvre d'art" onPress={createArtwork} />
+      <Button title="Supprimer l'œuvre sélectionnée" onPress={removeArtwork} />
     </View>
   );
 };

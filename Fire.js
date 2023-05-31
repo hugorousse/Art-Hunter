@@ -1,13 +1,9 @@
-import { initializeApp } from 'firebase/app'
-import {
-  getFirestore, collection, addDoc, query, orderBy, onSnapshot,
-  doc,
-  updateDoc,
-  deleteDoc
-} from 'firebase/firestore'
+import { initializeApp } from 'firebase/app';
+import { getFirestore, doc, collection, addDoc, query, where, orderBy, onSnapshot, deleteDoc } from 'firebase/firestore';
 
-const firebaseConfig = {
-  // Placez ici vos identifiants Firebase (SDK) - Cf. diapos 14 et 15
+
+
+export const firebaseConfig = {
   apiKey: "AIzaSyDI9IvN1tPNpjLU4YkBX7UE9ELhh5aRqx0",
   authDomain: "art-hunter.firebaseapp.com",
   databaseURL: "https://art-hunter-default-rtdb.europe-west1.firebasedatabase.app",
@@ -17,31 +13,36 @@ const firebaseConfig = {
   appId: "1:1013204360524:web:7049351866930cf89583e9",
   measurementId: "G-T558L2E4Y9"
 }
+const app = initializeApp(firebaseConfig);
+export const db = getFirestore(app);
 
-const app = initializeApp(firebaseConfig)
-const db = getFirestore(app)
-
-export const getArtworks = callback => {
-  const q = query(collection(db, 'artworks'), orderBy('title', 'asc'))
-  onSnapshot(q, snapshot => {
-    let artworks = []
-    snapshot.forEach(doc => {
-      artworks.push({ id: doc.id, ...doc.data() })
-    })
-    callback(artworks)
-  })
-}
+export const getArtworks = (callback) => {
+  const artworksRef = collection(db, 'artworks');
+  const unsubscribe = onSnapshot(artworksRef, (snapshot) => {
+    const artworksData = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+    callback(artworksData);
+  });
+  return unsubscribe;
+};
 
 export const addArtwork = artwork => {
-  addDoc(collection(db, 'artworks'), artwork)
-}
+  addDoc(collection(db, 'artworks'), artwork);
+};
 
 export const updateArtwork = artwork => {
-  updateDoc(doc(db, 'artworks', artwork.id), artwork)
-}
+  updateDoc(doc(db, 'artworks', artwork.id), artwork);
+};
 
 export const deleteArtwork = artwork => {
-  deleteDoc(doc(db, 'artworks', artwork.id))
-}
+  deleteDoc(doc(db, 'artworks', artwork.id));
+};
+
+export { app };
+
+
+
 
 
